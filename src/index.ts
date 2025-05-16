@@ -12,6 +12,7 @@ export function pulse<T>({ defaultValue, key, storageType, opt }: PulseParams<T>
         id: getUniqueId(),
         key: key,
         storageType: storage_type,
+        defaultValue: JSON.parse(JSON.stringify(defaultValue)),
         value: defaultValue,
         opt: opt
     }
@@ -48,6 +49,7 @@ export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promi
             id: id,
             key: pulseObject.key,
             storageType: pulseObject.storageType,
+            defaultValue: pulseObject.defaultValue,
             value: value
         });
     }, [id])
@@ -127,6 +129,7 @@ export function setPulse<T>(pulseObject: Pulse<T>, value: T): Pulse<T> {
         id: pulseObject.id,
         key: pulseObject.key,
         storageType: pulseObject.storageType,
+        defaultValue: pulseObject.defaultValue,
         value: value
     });
     

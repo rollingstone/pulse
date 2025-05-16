@@ -8,6 +8,7 @@ export interface Pulse<T> {
   id: number;
   key?: string;
   storageType?: StorageType;
+  defaultValue: T;
   value: T;
   opt?: PulseOptions<T>;
 }

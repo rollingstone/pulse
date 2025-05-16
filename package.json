@@ -1,6 +1,10 @@
 {
-  "name": "pulse",
-  "version": "1.0.0",
+  "name": "@rollingstone/pulse",
+  "version": "1.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rollingstone/pulse.git"
+  },
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -16,7 +20,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "rollingstone - AeonX AI",
   "license": "ISC",
   "description": "",
   "devDependencies": {

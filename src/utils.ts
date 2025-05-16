@@ -1,9 +1,8 @@
-
 import { StorageEnum, StorageType } from "./types";
 
 
 
-export function getRandomInt(max: number): number {
+export function getRandomInt(max) {
   return Math.floor(Math.random() * max) *1000;
 }
 

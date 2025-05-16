@@ -6,15 +6,14 @@ import { checkKey, getUniqueId, persistantStorageGet, persistantStorageSet } fro
 const pulseObserver: Subject<Pulse<any>> = new Subject<Pulse<any>>();
 pulseObserver.subscribe()
 
-export function pulse<T>({ defaultValue, key, storageType, opt }: PulseParams<T>): Pulse<T> {
+export function pulse<T>({ defaultValue, key, storageType }: PulseParams<T>): Pulse<T> {
     const storage_type = storageType ?? StorageEnum.Local;
     const pulseObject: Pulse<T> = {
         id: getUniqueId(),
         key: key,
         storageType: storage_type,
         defaultValue: JSON.parse(JSON.stringify(defaultValue)),
-        value: defaultValue,
-        opt: opt
+        value: defaultValue,        
     }
 
     if (key) {
@@ -32,7 +31,7 @@ export function pulse<T>({ defaultValue, key, storageType, opt }: PulseParams<T>
 }
 
 export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promise<void>): [T, (value: T) => void, boolean, boolean] {
-    const [state, setState0] = useState<T>(pulseObject.value);
+    const [state, setState0] = useState<T>(pulseObject.defaultValue);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
     const [result, setResult] = useState<any>(null);
@@ -40,18 +39,7 @@ export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promi
     const id = pulseObject.id;
 
     const setState = useCallback((value: T) => {
-
-        if (pulseObject.key) {
-            persistantStorageSet(pulseObject.key, value, pulseObject.storageType);
-        }
-
-        pulseObserver.next({
-            id: id,
-            key: pulseObject.key,
-            storageType: pulseObject.storageType,
-            defaultValue: pulseObject.defaultValue,
-            value: value
-        });
+        setPulseValue(pulseObject, value);        
     }, [id])
 
 
@@ -118,10 +106,8 @@ export function usePulseSetValue<T>(pulseObject: Pulse<T>, callback?: () => void
     return setState;
 }
 
-
-
 // send
-export function setPulse<T>(pulseObject: Pulse<T>, value: T): Pulse<T> {
+export function setPulseValue<T>(pulseObject: Pulse<T>, value: T): Pulse<T> {
     if (pulseObject.key) {
         persistantStorageSet(pulseObject.key, value, pulseObject.storageType);
     }
@@ -136,17 +122,7 @@ export function setPulse<T>(pulseObject: Pulse<T>, value: T): Pulse<T> {
     return pulseObject;
 }
 
-
-// export function getPulse<T>(pulseObject: Pulse<T>): T | null {
-//     if (pulseObject.key) {
-//         return persistantStorageGet(pulseObject.key);
-//     }
-
-//     return pulseObject.value
-// }
-
-
-export function getPulse<T>(pulseObject: Pulse<T>): T | null {
+export function getPulseValue<T>(pulseObject: Pulse<T>): T | null {
     if (pulseObject.key) {
         return persistantStorageGet(pulseObject.key, pulseObject.storageType);
     }

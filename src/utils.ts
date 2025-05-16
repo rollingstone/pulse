@@ -1,17 +1,17 @@
 import { StorageEnum, StorageType } from "./types";
 
+const keyCache: { [key: string]: any } = {};
+const pulseObjectCache: { [key: string]: any } = {};
+
 export function getRandomInt(max: number) {
   return Math.floor(Math.random() * max) * 1000;
 }
 
-export const getUniqueId = () => {
+export function getUniqueId() {
   return new Date().getTime() + getRandomInt(1000);
-};
+}
 
-const keyCache: { [key: string]: any } = {};
-const pulseObjectCache: { [key: string]: any } = {};
-
-export const registerPulseObject = (pulseObject: any) => {
+export function registerPulseObject(pulseObject: any) {
   if (pulseObjectCache[pulseObject.id]) {
     const msg = `Pulse object with id: ${pulseObject.id} already registered`;
     console.error(msg);
@@ -19,9 +19,9 @@ export const registerPulseObject = (pulseObject: any) => {
   } else {
     pulseObjectCache[pulseObject.id] = pulseObject;
   }
-};
+}
 
-export const unregisterPulseObject = (pulseObject: any) => {
+export function unregisterPulseObject(pulseObject: any) {
   if (pulseObjectCache[pulseObject.id]) {
     delete pulseObjectCache[pulseObject.id];
   } else {
@@ -29,9 +29,9 @@ export const unregisterPulseObject = (pulseObject: any) => {
     console.error(msg);
     throw new Error(msg);
   }
-};
+}
 
-export const resetPulseObject = (pulseObject: any) => {
+export function resetPulseObject(pulseObject: any) {
   if (pulseObjectCache[pulseObject.id]) {
     pulseObjectCache[pulseObject.id].value = pulseObject.defaultValue;
   } else {
@@ -41,17 +41,16 @@ export const resetPulseObject = (pulseObject: any) => {
   }
 }
 
-export const resetAllPulseObjects = () => {
+export function resetAllPulseObjects() {
   Object.keys(pulseObjectCache).forEach((key) => {
     const pulseObject = pulseObjectCache[key];
     if (pulseObject) {
       pulseObject.value = pulseObject.defaultValue;
     }
   });
-};
+}
 
-
-export const checkKey = (key: string) => {
+export function checkKey(key: string) {
   if (!key) {
     return true;
   }
@@ -63,7 +62,7 @@ export const checkKey = (key: string) => {
     keyCache[key] = true;
     return true;
   }
-};
+}
 
 export function persistantStorageSet<T>(
   key: string,

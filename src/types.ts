@@ -1,3 +1,5 @@
+import { pulse } from ".";
+
 export const enum StorageEnum {
   Local = 1,
   Session = 2,
@@ -9,21 +11,11 @@ export interface Pulse<T> {
   key?: string;
   storageType?: StorageType;
   defaultValue: T;
-  value: T;
-  opt?: PulseOptions<T>;
+  value: T;  
 }
 
-export interface PulseGet<T> {
-    get: (pulseObject: Pulse<T>) => T | null;
-} 
-
-export interface PulseSet<T> {    
-    get?: PulseGet<T>;
-    set: (value: T) => void;
-    value: T;
-}
-
-
+export type PulseGet<T> = (pulseObject: Pulse<T>) => T | null;
+export type PulseSet<T> = (get: Pulse<T>, set: (pulseObject: Pulse<T>, value: T) => void,  value: T) => void;
 
 export interface PulseOptions<T> {
   get?: PulseGet<T>;

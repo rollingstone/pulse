@@ -1,1 +1,1 @@
-Pulse
+Pulse - a React State Manager

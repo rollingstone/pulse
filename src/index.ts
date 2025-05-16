@@ -12,7 +12,7 @@ export function pulse<T>({ defaultValue, key, storageType }: PulseParams<T>): Pu
         id: getUniqueId(),
         key: key,
         storageType: storage_type,
-        defaultValue: JSON.parse(JSON.stringify(defaultValue)),
+        defaultValue: defaultValue,
         value: defaultValue,        
     }
 

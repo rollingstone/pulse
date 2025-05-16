@@ -30,7 +30,7 @@ export function pulse<T>({ defaultValue, key, storageType }: PulseParams<T>): Pu
     return pulseObject;
 }
 
-export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promise<void>): [T, (value: T) => void, boolean, boolean] {
+export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promise<void>): [T, (value: T) => void, T, boolean, boolean] {
     const [state, setState0] = useState<T>(pulseObject.defaultValue);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
@@ -92,7 +92,7 @@ export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promi
     }, [id]);
 
 
-    return [state, setState, isProcessing, isFinished];
+    return [state, setState, result, isProcessing, isFinished];
 }
 
 

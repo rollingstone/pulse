@@ -1,1 +1,1 @@
- npm publish --access publics
+  yarn build && npm publish --access public

@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
-import { filter, map, Observable, Subject } from 'rxjs';
+import { filter, map, Subject } from 'rxjs';
 import { Pulse, PulseParams, StorageEnum } from './types';
 import { checkKey, getUniqueId, persistantStorageGet, persistantStorageSet } from './utils';
 
 const pulseObserver: Subject<Pulse<any>> = new Subject<Pulse<any>>();
 pulseObserver.subscribe()
 
-export function pulse<T>({ defaultValue, key, storageType }: PulseParams<T>): Pulse<T> {
-    const storage_type = storageType ?? StorageEnum.Local;
+export function pulse<T>({ defaultValue, key, storageType, opt }: PulseParams<T>): Pulse<T> {
+    const storage_type = storageType ?? StorageEnum.LocalStorage;
     const pulseObject: Pulse<T> = {
         id: getUniqueId(),
         key: key,
         storageType: storage_type,
-        defaultValue: defaultValue,
-        value: defaultValue,        
+        value: defaultValue,
+        opt: opt
     }
 
     if (key) {
@@ -30,8 +30,8 @@ export function pulse<T>({ defaultValue, key, storageType }: PulseParams<T>): Pu
     return pulseObject;
 }
 
-export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promise<void>): [T, (value: T) => void, T, boolean, boolean] {
-    const [state, setState0] = useState<T>(pulseObject.defaultValue);
+export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promise<void>): [T, (value: T) => void, boolean, boolean] {
+    const [state, setState0] = useState<T>(pulseObject.value);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isFinished, setIsFinished] = useState(false);
     const [result, setResult] = useState<any>(null);
@@ -39,7 +39,17 @@ export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promi
     const id = pulseObject.id;
 
     const setState = useCallback((value: T) => {
-        setPulseValue(pulseObject, value);        
+
+        if (pulseObject.key) {
+            persistantStorageSet(pulseObject.key, value, pulseObject.storageType);
+        }
+
+        pulseObserver.next({
+            id: id,
+            key: pulseObject.key,
+            storageType: pulseObject.storageType,
+            value: value
+        });
     }, [id])
 
 
@@ -49,7 +59,6 @@ export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promi
             map((value: any) => value.value),
             // observeOn(asyncScheduler)
         ).subscribe((value: T) => {
-            pulseObject.value = value;
             setState0(value);
             
             if (callback) {
@@ -92,22 +101,22 @@ export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promi
     }, [id]);
 
 
-    return [state, setState, result, isProcessing, isFinished];
+    return [state, setState, isProcessing, isFinished];
 }
 
 
 export function usePulseValue<T>(pulseObject: Pulse<T>, callback?: () => void | Promise<void>): T {
-    const [state] = usePulse(pulseObject, callback);
+    const [state, _] = usePulse(pulseObject, callback);
     return state;
 }
 
 export function usePulseSetValue<T>(pulseObject: Pulse<T>, callback?: () => void | Promise<void>): (value: T) => void {
-    const [, setState] = usePulse(pulseObject, callback);
+    const [_, setState] = usePulse(pulseObject, callback);
     return setState;
 }
 
 // send
-export function setPulseValue<T>(pulseObject: Pulse<T>, value: T): Pulse<T> {
+export function setPulse<T>(pulseObject: Pulse<T>, value: T): Pulse<T> {
     if (pulseObject.key) {
         persistantStorageSet(pulseObject.key, value, pulseObject.storageType);
     }
@@ -115,16 +124,18 @@ export function setPulseValue<T>(pulseObject: Pulse<T>, value: T): Pulse<T> {
         id: pulseObject.id,
         key: pulseObject.key,
         storageType: pulseObject.storageType,
-        defaultValue: pulseObject.defaultValue,
         value: value
     });
     
     return pulseObject;
 }
 
-export function getPulseValue<T>(pulseObject: Pulse<T>): T | null {
+
+export function getPulse<T>(pulseObject: Pulse<T>): T | null {
     if (pulseObject.key) {
-        return persistantStorageGet(pulseObject.key, pulseObject.storageType);
+        return persistantStorageGet(pulseObject.key);
     }
+
     return pulseObject.value
 }
+

@@ -1,21 +1,26 @@
-import { pulse } from ".";
-
 export const enum StorageEnum {
-  Local = 1,
-  Session = 2,
+  LocalStorage = 1,
+  SessionStorage = 2,
 }
-export type StorageType = StorageEnum.Local | StorageEnum.Session;
+export type StorageType = StorageEnum.LocalStorage | StorageEnum.SessionStorage;
 
 export interface Pulse<T> {
   id: number;
   key?: string;
   storageType?: StorageType;
-  defaultValue: T;
-  value: T;  
+  value: T;
+  opt?: PulseOptions<T>;
 }
 
-export type PulseGet<T> = (pulseObject: Pulse<T>) => T | null;
-export type PulseSet<T> = (get: Pulse<T>, set: (pulseObject: Pulse<T>, value: T) => void,  value: T) => void;
+export interface PulseGet<T> {
+  get: (pulseObject: Pulse<T>) => T | null;
+}
+
+export interface PulseSet<T> {
+  get?: PulseGet<T>;
+  set: (value: T) => void;
+  value: T;
+}
 
 export interface PulseOptions<T> {
   get?: PulseGet<T>;
@@ -27,4 +32,8 @@ export interface PulseParams<T> {
   key?: string;
   storageType?: StorageType;
   opt?: PulseOptions<T>;
+  get?: ({ get }) => Promise<T>;
+  set?: ({ get, set, newValue }) => Promise<void>;
+  reset?: () => Promise<void>;  
 }
+

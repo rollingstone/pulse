@@ -27,12 +27,16 @@ export interface PulseOptions<T> {
   set?: PulseSet<T>;
 }
 
+// export interface GetType<T> {
+//   <T>(pulseObject: Pulse<T>): T | null;
+// }
+
 export interface PulseParams<T> {
   defaultValue: T;
   key?: string;
   storageType?: StorageType;
   opt?: PulseOptions<T>;
-  get?: ({ get }) => Promise<T>;
+  get?: <T>({ get }) => Promise<T>;
   set?: ({ get, set, newValue }) => Promise<void>;
   reset?: () => Promise<void>;  
 }

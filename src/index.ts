@@ -59,6 +59,7 @@ export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promi
             map((value: any) => value.value),
             // observeOn(asyncScheduler)
         ).subscribe((value: T) => {
+            pulseObject.value = value;
             setState0(value);
             
             if (callback) {
@@ -106,12 +107,12 @@ export function usePulse<T>(pulseObject: Pulse<T>, callback?: () => void | Promi
 
 
 export function usePulseValue<T>(pulseObject: Pulse<T>, callback?: () => void | Promise<void>): T {
-    const [state, _] = usePulse(pulseObject, callback);
+    const [state] = usePulse(pulseObject, callback);
     return state;
 }
 
 export function usePulseSetValue<T>(pulseObject: Pulse<T>, callback?: () => void | Promise<void>): (value: T) => void {
-    const [_, setState] = usePulse(pulseObject, callback);
+    const [, setState] = usePulse(pulseObject, callback);
     return setState;
 }
 

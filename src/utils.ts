@@ -36,7 +36,7 @@ export function persistantStorageSet<T>(key: string, value: T, storageType: Stor
     }
 }
 
-export function persistantStorageGet<T>(key: string, storageType: StorageType = StorageEnum.LocalStorage): T | null {
+export function persistantStorageGet<T>(key: string, storageType: StorageType = StorageEnum.LocalStorage): T {
     let value: string | null = null;
     if (storageType === StorageEnum.SessionStorage) {
         value = sessionStorage.getItem(key);
@@ -44,6 +44,10 @@ export function persistantStorageGet<T>(key: string, storageType: StorageType = 
         value = localStorage.getItem(key);
     }
 
-    const result: T | null = value ? JSON.parse(value) : null;
-    return result;
+    if (value === null || value === "undefined" || value === undefined) {
+        return value as T;
+    }
+
+    const result: T | null = value? JSON.parse(value) : null;
+    return result as T;
 }

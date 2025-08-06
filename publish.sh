@@ -1,1 +1,1 @@
-  yarn build && npm publish --access public
+  git push --tags && yarn build && npm publish --access public

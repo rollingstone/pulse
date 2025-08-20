@@ -8,6 +8,7 @@ A lightweight, reactive state management library for React. It leverages the pow
 *   **React Hooks**: A set of hooks (`usePulse`, `usePulseValue`, `usePulseSetValue`) for seamless integration with your React components.
 *   **Persistent State**: Easily persist state to `LocalStorage` or `SessionStorage` with a simple configuration option.
 *   **Reactive Core**: Built on an RxJS `Subject` for efficient and predictable state updates.
+*   **Imperative Usage, Update State from anywhere**: Update react component from anyshere, even from outside of the React component.
 *   **Async Callback Handling**: The `usePulse` hook can take a callback and provides `isProcessing` and `isFinished` states, perfect for handling side-effects like API calls.
 *   **Imperative Usage, Update State from anywhere**: Update react component from anyshere, even from outside of the React component.
 
@@ -99,7 +100,7 @@ The `usePulse` hook can accept a callback that triggers whenever the state chang
 ```tsx
 // src/components/DataFetcher.tsx
 import React from 'react';
-import { pulse, usePulse } from 'pulse-signalx';
+import { pulse, usePulse } from '@rollingstone/pulse';
 
 // A pulse to trigger a data fetch
 const fetchTriggerPulse = pulse({ defaultValue: 0 });

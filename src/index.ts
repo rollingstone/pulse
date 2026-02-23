@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { filter, map, Subject } from "rxjs";
 import { Pulse, PulseParams, StorageEnum } from "./types";
 import {
@@ -24,6 +24,7 @@ export function pulse<T>({
     id: getUniqueId(),
     key: key,
     storageType: storage_type,
+    defaultValue: defaultValue,
     value: defaultValue,
     get: get,
     set: set,
@@ -56,13 +57,18 @@ export function pulse<T>({
 export function usePulse<T>(
   pulseObject: Pulse<T>,
   callback?: () => void | Promise<void>
-): [T, (value: T) => void, boolean] {
+): [T, (value: T) => void, boolean, any] {
   const [state, setState0] = useState<T>(pulseObject?.value);
   const [isLoading, setIsLoading] = useState(false);
-  // const [isFinished, setIsFinished] = useState(false);
   const [result, setResult] = useState<any>(null);
 
   const id = pulseObject.id;
+  const callbackRef = useRef(callback);
+  const isLoadingRef = useRef(false);
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
 
   const setState = useCallback(
     (value: T) => {
@@ -76,40 +82,43 @@ export function usePulse<T>(
       .pipe(
         filter((value: Pulse<T>) => value.id === id),
         map((value: any) => value.value)
-        // observeOn(asyncScheduler)
       )
       .subscribe((value: T) => {
         pulseObject.value = value;
         setState0(value);
 
-        if (callback) {
-          if (isLoading) {
-            return;
-          }
-
-          if (callback.constructor.name === "AsyncFunction") {
-            setIsLoading(true);
-            callback()
-              ?.then((result: any) => {
-                setResult(result);
-                setIsLoading(false);
-              })
-              .catch((error: any) => {
-                // console.error(error);
-                setResult(null);
-                setIsLoading(false);
-              })
+        const currentCallback = callbackRef.current;
+        if (currentCallback) {
+          if (isLoadingRef.current) {
             return;
           }
 
           try {
-            setIsLoading(true);
-            const _result = callback();
-            setResult(_result);
+            const potentialPromise = currentCallback();
+
+            if (
+              potentialPromise &&
+              typeof (potentialPromise as any).then === "function"
+            ) {
+              isLoadingRef.current = true;
+              setIsLoading(true);
+              (potentialPromise as Promise<any>)
+                .then((res) => {
+                  setResult(res);
+                })
+                .catch((err) => {
+                  setResult(err);
+                })
+                .finally(() => {
+                  isLoadingRef.current = false;
+                  setIsLoading(false);
+                });
+            } else {
+              setResult(potentialPromise);
+            }
           } catch (error) {
-            console.error(error);
-            setResult(null);
-          } finally {
+            setResult(error);
+            isLoadingRef.current = false;
             setIsLoading(false);
           }
         }
@@ -118,9 +127,9 @@ export function usePulse<T>(
     return () => {
       subs.unsubscribe();
     };
-  }, [id]);
+  }, [id, pulseObject]);
 
-  return [state, setState, isLoading];
+  return [state, setState, isLoading, result];
 }
 
 export function usePulseValue<T>(
@@ -176,4 +185,13 @@ export function getPulse<T>(pulseObject: Pulse<T>): T {
   }
 
   return pulseObject.value;
+}
+
+export function resetPulse<T>(pulseObject: Pulse<T>): Pulse<T> {
+  if (pulseObject.reset) {
+    pulseObject.reset();
+  } else {
+    setPulse(pulseObject, pulseObject.defaultValue as T);
+  }
+  return pulseObject;
 }
